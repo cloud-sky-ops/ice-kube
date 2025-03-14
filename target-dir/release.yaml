@@ -1,0 +1,32 @@
+name: Release Binary
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.21
+
+      - name: Build binaries
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o kube-cleanup-linux
+          GOOS=darwin GOARCH=amd64 go build -o kube-cleanup-macos
+          GOOS=windows GOARCH=amd64 go build -o kube-cleanup.exe
+
+      - name: Upload binaries to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            kube-cleanup-linux
+            kube-cleanup-macos
+            kube-cleanup.exe
