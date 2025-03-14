@@ -1,0 +1,3 @@
+To create go.mod file use:
+module github.com/yourusername/kube-cleanup
+then run go mod tidy to resolve external dependencies

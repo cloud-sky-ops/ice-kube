@@ -1,11 +1,12 @@
-package main
+package kube_cleanup
 
 import (
 	"fmt"
 	"os"
 
+	"github.com/cloud-sky-ops/kube-cleanup/pkg/kubeclient"
+
 	"github.com/spf13/cobra"
-	"kube-cleanup/pkg/kubeclient"
 )
 
 func main() {
