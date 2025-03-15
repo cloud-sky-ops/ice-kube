@@ -24,3 +24,9 @@ func Execute() {
 		fmt.Println("Error executing command:", err)
 	}
 }
+
+func init() {
+	// Place to define global flags and configuration settings.
+	// Global flags are supported by cobra using PersistentFlags
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Share detailed logs")
+}
