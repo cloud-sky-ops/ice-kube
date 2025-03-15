@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cloud-sky-ops/kube-cleanup/pkg/kubeclient"
+	"github.com/cloud-sky-ops/ice-kube/pkg/kubeclient"
 
 	"github.com/spf13/cobra"
 )

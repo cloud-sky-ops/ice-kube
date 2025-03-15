@@ -19,14 +19,14 @@ jobs:
 
       - name: Build binaries
         run: |
-          GOOS=linux GOARCH=amd64 go build -o kube-cleanup-linux
-          GOOS=darwin GOARCH=amd64 go build -o kube-cleanup-macos
-          GOOS=windows GOARCH=amd64 go build -o kube-cleanup.exe
+          GOOS=linux GOARCH=amd64 go build -o ice-kube-linux
+          GOOS=darwin GOARCH=amd64 go build -o ice-kube-macos
+          GOOS=windows GOARCH=amd64 go build -o ice-kube.exe
 
       - name: Upload binaries to GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            kube-cleanup-linux
-            kube-cleanup-macos
-            kube-cleanup.exe
+            ice-kube-linux
+            ice-kube-macos
+            ice-kube.exe

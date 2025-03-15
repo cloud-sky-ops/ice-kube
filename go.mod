@@ -1,4 +1,4 @@
-module github.com/cloud-sky-ops/kube-cleanup
+module github.com/cloud-sky-ops/ice-kube
 
 go 1.24.1
 

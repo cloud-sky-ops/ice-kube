@@ -8,12 +8,12 @@ import (
 
 // rootCmd represents the base command
 var rootCmd = &cobra.Command{
-	Use:   "kube-cleanup",
+	Use:   "ice-kube",
 	Short: "CLI tool for cleaning up unused Kubernetes resources",
-	Long: `Kube Cleanup is a command-line tool to help identify and remove 
+	Long: `ICE Kube is a command-line tool to help identify and remove 
 unused Kubernetes resources for better cost optimization.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Kube Cleanup CLI - Use 'kube-cleanup scan' to scan for unused resources.")
+		fmt.Println("ICE Kube CLI - Use 'ice-kube scan' to scan for unused resources.")
 	},
 }
 

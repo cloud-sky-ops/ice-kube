@@ -2,7 +2,7 @@
 set -e
 
 OUTPUT_DIR="bin"
-APP_NAME="kube-cleanup"
+APP_NAME="ice-kube"
 
 mkdir -p "$OUTPUT_DIR"
 go build -o "$OUTPUT_DIR/$APP_NAME" ./cmd/main.go
