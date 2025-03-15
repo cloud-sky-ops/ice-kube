@@ -13,7 +13,7 @@ func main() {
 	var clusterName string
 
 	var rootCmd = &cobra.Command{
-		Use:   "kube-cleanup",
+		Use:   "ice-kube",
 		Short: "A CLI tool for cleaning up unused Kubernetes resources",
 	}
 
