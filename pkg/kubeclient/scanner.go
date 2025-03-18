@@ -41,7 +41,7 @@ func ScanCluster(clusterName string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to list pods: %v", err)
 	}
-	fmt.Printf("Found %d pods in cluster %s", len(pods.Items), clusterName)
+	fmt.Printf("Found %d pods in cluster %s\n", len(pods.Items), clusterName)
 
 	maxPermittedTime := time.Now().Add(-24* time.Hour) // reduce 24 hours in current time to set maxPermittedTime 
 	deletedPods := 0
@@ -79,7 +79,7 @@ func ScanCluster(clusterName string) (string, error) {
 		return "", fmt.Errorf("failed to list pods: %v", err)
 	}
 
-	fmt.Printf("Found %d pods in cluster %s after deletion", len(pods.Items), clusterName)
+	fmt.Printf("Found %d pods in cluster %s after deletion\n", len(pods.Items), clusterName)
 
 	// Delete unbouded PVCs
 	pvcs, err := clientset.CoreV1().PersistentVolumeClaims("").List(context.TODO(), metav1.ListOptions{})
