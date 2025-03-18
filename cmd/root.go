@@ -6,6 +6,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var clusterName string
+
 // rootCmd represents the base command
 var rootCmd = &cobra.Command{
 	Use:   "ice-kube",

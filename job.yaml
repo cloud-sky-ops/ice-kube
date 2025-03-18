@@ -1,0 +1,52 @@
+# These resources can be created on minikube to test the scan and delete command on local
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: job-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sample-job
+  namespace: default
+spec:
+  template:
+    metadata:
+      name: sample-job
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: job-container
+          image: busybox
+          command: ["sh", "-c", "echo Job Completed! && sleep 5"]
+          volumeMounts:
+            - mountPath: "/data"
+              name: job-storage
+      volumes:
+        - name: job-storage
+          persistentVolumeClaim:
+            claimName: job-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: job-service
+  namespace: default
+spec:
+  selector:
+    job-name: sample-job
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var clusterName string
 
 var scanCmd = &cobra.Command{
 	Use:   "scan",
