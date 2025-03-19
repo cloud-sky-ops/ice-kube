@@ -1,14 +1,16 @@
 package utils
 
 import (
-	"fmt"
+	"log"
 	"os"
+
+	"github.com/TwiN/go-color"
 )
 
-// CheckError is a utility function to handle errors gracefully.
-func CheckError(err error) {
+// PrintError is a utility function to handle errors gracefully.
+func PrintError(errorMessage string, err error) {
 	if err != nil {
-		fmt.Println("Error:", err)
+		log.Println(errorMessage, color.Ize(color.Red, err)) // using log package to add timestamp with the error
 		os.Exit(1)
 	}
 }

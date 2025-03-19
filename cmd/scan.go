@@ -2,12 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/cloud-sky-ops/ice-kube/pkg/kubeclient"
+	utils "github.com/cloud-sky-ops/ice-kube/internal"	
 	"github.com/spf13/cobra"
 )
-
 
 var scanCmd = &cobra.Command{
 	Use:   "scan",
@@ -20,8 +19,8 @@ var scanCmd = &cobra.Command{
 		fmt.Println("Scanning cluster:", clusterName)
 		result, err := kubeclient.ScanCluster(clusterName)
 		if err != nil {
-			fmt.Println("Error scanning cluster:", err)
-			os.Exit(1)
+			message := "Error scanning cluster:"
+			utils.PrintError(message, err)
 		}
 		fmt.Println("Scan Result:", result)
 		return nil
