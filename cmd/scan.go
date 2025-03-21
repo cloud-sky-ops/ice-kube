@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
+	utils "github.com/cloud-sky-ops/ice-kube/internal"
 	"github.com/cloud-sky-ops/ice-kube/pkg/kubeclient"
-	utils "github.com/cloud-sky-ops/ice-kube/internal"	
 	"github.com/spf13/cobra"
 )
 

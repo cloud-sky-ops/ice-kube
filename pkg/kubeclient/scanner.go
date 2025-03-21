@@ -4,28 +4,16 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
-	"path/filepath"
 	"time"
-
+	utils "github.com/cloud-sky-ops/ice-kube/internal"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 // ScanCluster connects to the Kubernetes API and cleans up completed pods, PVCs, and LoadBalancers
 func ScanCluster(clusterName string) (string, error) {
-	// Fetch kubeconfig file path to get config values like "KUBERNETES_SERVICE_HOST", "KUBERNETES_SERVICE_PORT" and many more
-	// This logic counters the error ""unable to load in-cluster configuration, KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT must be defined""
-	// The default path for kube config file is "/home/username/.kube/config" and this code extracts the same and stores all values in config varibale
 
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatalf("Error getting home directory: %v", err)
-	}
-
-	kubeconfigPath := filepath.Join(homeDir, ".kube", "config")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+	config, err := utils.GetKubeConfig()
 
 	if err != nil {
 		return "", fmt.Errorf("failed to create Kubernetes config: %v", err)
@@ -43,7 +31,7 @@ func ScanCluster(clusterName string) (string, error) {
 	}
 	fmt.Printf("Found %d pods in cluster %s\n", len(pods.Items), clusterName)
 
-	maxPermittedTime := time.Now().Add(-24* time.Hour) // reduce 24 hours in current time to set maxPermittedTime 
+	maxPermittedTime := time.Now().Add(-24 * time.Hour) // reduce 24 hours in current time to set maxPermittedTime
 	deletedPods := 0
 
 	for _, pod := range pods.Items {

@@ -5,9 +5,9 @@ then run go mod tidy to resolve external dependencies
 Instant Cleanup Enabler
 Instant Cost Evaluator
 
-
 Enhancements:
 Name of the resources deleted
 filter resource by namespace
 add dryRun flag option
-Create separate file for scan and delete, scan should list all available resources.
+Create separate commands for scan and delete, scan should list all available resources.
+ice-kube e2e sonarqube scan configuration
