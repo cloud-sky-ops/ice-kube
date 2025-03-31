@@ -7,6 +7,7 @@ import (
 )
 
 var clusterName string
+var deleteBeforeHours int
 
 // rootCmd represents the base command
 var rootCmd = &cobra.Command{

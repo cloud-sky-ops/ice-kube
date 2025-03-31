@@ -10,7 +10,9 @@
       "args": [
           "scan",
           "--cluster",
-          "minikube"
+          "minikube",
+          "--delete-before-hours",
+          "48"
       ]
     }
   ]

@@ -11,12 +11,12 @@ import (
 )
 
 // ScanCluster connects to the Kubernetes API and cleans up completed pods, PVCs, and LoadBalancers
-func ScanCluster(clusterName string) (string, error) {
+func ScanCluster(clusterName string, deleteBeforeHours int) (string, error) {
 
 	config, err := utils.GetKubeConfig()
 
 	if err != nil {
-		return "", fmt.Errorf("failed to create Kubernetes config: %v", err)
+		return "", fmt.Errorf("failed to fetch Kubernetes config: %v", err)
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)
@@ -31,7 +31,7 @@ func ScanCluster(clusterName string) (string, error) {
 	}
 	fmt.Printf("Found %d pods in cluster %s\n", len(pods.Items), clusterName)
 
-	maxPermittedTime := time.Now().Add(-24 * time.Hour) // reduce 24 hours in current time to set maxPermittedTime
+	maxPermittedTime := time.Now().Add(time.Duration(deleteBeforeHours) * time.Hour) // reduce 24 hours in current time to set maxPermittedTime
 	deletedPods := 0
 
 	for _, pod := range pods.Items {
