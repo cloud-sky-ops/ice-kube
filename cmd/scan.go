@@ -32,5 +32,5 @@ func init() {
 	rootCmd.AddCommand(scanCmd)
 	scanCmd.Flags().StringVarP(&clusterName, "cluster", "c", "", "Specify the cluster name")
 	scanCmd.MarkFlagRequired("cluster")
-	scanCmd.Flags().IntVarP(&deleteBeforeHours, "delete-before-hours", "", 24, "Delete resources created before these number of hours. Default is 24 hours." )
+	scanCmd.Flags().IntVarP(&deleteBeforeHours, "delete-before-hours", "", 24, "Delete resources created before these number of hours." )
 }
