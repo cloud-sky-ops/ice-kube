@@ -8,6 +8,20 @@
       "mode": "debug",
       "program": "${env:HOME}/ice-kube/main.go",
       "args": [
+          "scan",
+          "--cluster",
+          "minikube",
+          "--namespace",
+          "default"
+      ]
+    },
+    {
+      "name": "Debug CLI - Delete Resources",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${env:HOME}/ice-kube/main.go",
+      "args": [
           "delete",
           "--cluster",
           "minikube",

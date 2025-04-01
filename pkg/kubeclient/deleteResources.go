@@ -2,61 +2,28 @@ package kubeclient
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"time"
 
 	utils "github.com/cloud-sky-ops/ice-kube/internal"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
 // DeleteResources connects to the Kubernetes API and cleans up completed pods, PVCs, and LoadBalancers
 func DeleteResources(clusterName string, deleteBeforeHours int, namespace string) (string, error) {
 
-	config, err := utils.GetKubeConfig()
+	clientset, err := utils.GetClientSet()
 
-	if err != nil {
-		return "", fmt.Errorf("failed to fetch Kubernetes config: %v", err)
-	}
-
-	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return "", fmt.Errorf("failed to create Kubernetes client: %v", err)
 	}
 
-	namespaceList, err := clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+	pods, err := ScanResources(clusterName, namespace)
 
-	if err != nil {
-		fmt.Print(err)
-	}
-	namespaceFound := false
-
-	if namespace == "" {
-		namespaceFound = true
-	}
-
-	if !namespaceFound {
-		for _, ns := range namespaceList.Items {
-			if ns.Name == namespace {
-				namespaceFound = true
-			}
-		}
-	}
-
-	if !namespaceFound {
-		message := "NAMESPACE NOT FOUNT IN CLUSTER"
-		namespaceError := errors.New("RE-CHECK INPUT --namespace")
-		utils.PrintError(message, namespaceError)
-	}
-
-	// Get pods data across all namespaces in the cluster
-	pods, err := clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return "", fmt.Errorf("failed to list pods: %v", err)
 	}
-	fmt.Printf("Found %d pods in cluster %s\n", len(pods.Items), clusterName)
 
 	maxPermittedTime := time.Now().Add(time.Duration(deleteBeforeHours) * time.Second) // reduce 24 hours in current time to set maxPermittedTime
 	deletedPods := 0
