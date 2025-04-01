@@ -8,11 +8,13 @@
       "mode": "debug",
       "program": "${env:HOME}/ice-kube/main.go",
       "args": [
-          "scan",
+          "delete",
           "--cluster",
           "minikube",
           "--delete-before-hours",
-          "48"
+          "48",
+          "--namespace",
+          "default"
       ]
     }
   ]

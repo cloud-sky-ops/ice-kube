@@ -2,16 +2,18 @@ package kubeclient
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
+
 	utils "github.com/cloud-sky-ops/ice-kube/internal"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
-// ScanCluster connects to the Kubernetes API and cleans up completed pods, PVCs, and LoadBalancers
-func ScanCluster(clusterName string, deleteBeforeHours int) (string, error) {
+// DeleteResources connects to the Kubernetes API and cleans up completed pods, PVCs, and LoadBalancers
+func DeleteResources(clusterName string, deleteBeforeHours int, namespace string) (string, error) {
 
 	config, err := utils.GetKubeConfig()
 
@@ -24,14 +26,39 @@ func ScanCluster(clusterName string, deleteBeforeHours int) (string, error) {
 		return "", fmt.Errorf("failed to create Kubernetes client: %v", err)
 	}
 
+	namespaceList, err := clientset.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
+
+	if err != nil {
+		fmt.Print(err)
+	}
+	namespaceFound := false
+
+	if namespace == "" {
+		namespaceFound = true
+	}
+
+	if !namespaceFound {
+		for _, ns := range namespaceList.Items {
+			if ns.Name == namespace {
+				namespaceFound = true
+			}
+		}
+	}
+
+	if !namespaceFound {
+		message := "NAMESPACE NOT FOUNT IN CLUSTER"
+		namespaceError := errors.New("RE-CHECK INPUT --namespace")
+		utils.PrintError(message, namespaceError)
+	}
+
 	// Get pods data across all namespaces in the cluster
-	pods, err := clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
+	pods, err := clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return "", fmt.Errorf("failed to list pods: %v", err)
 	}
 	fmt.Printf("Found %d pods in cluster %s\n", len(pods.Items), clusterName)
 
-	maxPermittedTime := time.Now().Add(time.Duration(deleteBeforeHours) * time.Hour) // reduce 24 hours in current time to set maxPermittedTime
+	maxPermittedTime := time.Now().Add(time.Duration(deleteBeforeHours) * time.Second) // reduce 24 hours in current time to set maxPermittedTime
 	deletedPods := 0
 
 	for _, pod := range pods.Items {
@@ -52,9 +79,9 @@ func ScanCluster(clusterName string, deleteBeforeHours int) (string, error) {
 			// Compare latestFinishTime with expiration threshold and delete resources fitting the set criteria
 			// Anything before 24 hours from now should be deleted (Before maxPermittedTime)
 			if !latestFinishTime.IsZero() && latestFinishTime.Before(maxPermittedTime) {
-				err := clientset.CoreV1().Pods(pod.Namespace).Delete(context.TODO(), pod.Name, metav1.DeleteOptions{})
+				err := clientset.CoreV1().Pods(namespace).Delete(context.TODO(), pod.Name, metav1.DeleteOptions{})
 				if err == nil {
-					log.Printf("Deleted completed pod: %s (namespace: %s, finished at: %s)", pod.Name, pod.Namespace, latestFinishTime)
+					log.Printf("Deleted completed pod: %s (namespace: %s, finished at: %s)", pod.Name, namespace, latestFinishTime)
 					deletedPods++
 				}
 			}
@@ -62,15 +89,15 @@ func ScanCluster(clusterName string, deleteBeforeHours int) (string, error) {
 	}
 
 	// Get updated list of pods data across all namespaces in the cluster, after deletion.
-	pods, err = clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
+	pods, err = clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return "", fmt.Errorf("failed to list pods: %v", err)
 	}
 
-	fmt.Printf("Found %d pods in cluster %s after deletion\n", len(pods.Items), clusterName)
+	fmt.Printf("Found %d pods in namespace %s after deletion\n", len(pods.Items), namespace)
 
 	// Delete unbouded PVCs
-	pvcs, err := clientset.CoreV1().PersistentVolumeClaims("").List(context.TODO(), metav1.ListOptions{})
+	pvcs, err := clientset.CoreV1().PersistentVolumeClaims(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return "", fmt.Errorf("failed to list PVCs: %v", err)
 	}
@@ -90,9 +117,9 @@ func ScanCluster(clusterName string, deleteBeforeHours int) (string, error) {
 			}
 
 			if !isUsed {
-				err := clientset.CoreV1().PersistentVolumeClaims(pvc.Namespace).Delete(context.TODO(), pvc.Name, metav1.DeleteOptions{})
+				err := clientset.CoreV1().PersistentVolumeClaims(namespace).Delete(context.TODO(), pvc.Name, metav1.DeleteOptions{})
 				if err == nil {
-					log.Printf("Deleted unbound PVC: %s (namespace: %s)", pvc.Name, pvc.Namespace)
+					log.Printf("Deleted unbound PVC: %s (namespace: %s)", pvc.Name, namespace)
 					deletedPVCs++
 				}
 			}
@@ -100,7 +127,7 @@ func ScanCluster(clusterName string, deleteBeforeHours int) (string, error) {
 	}
 
 	// Delete unused loadBalancer Service for which the pods are deleted, these will have no endpoints or sub-endpoints
-	services, err := clientset.CoreV1().Services("").List(context.TODO(), metav1.ListOptions{})
+	services, err := clientset.CoreV1().Services(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return "", fmt.Errorf("failed to list services: %v", err)
 	}
@@ -109,11 +136,11 @@ func ScanCluster(clusterName string, deleteBeforeHours int) (string, error) {
 	for _, svc := range services.Items {
 		if svc.Spec.Type == "LoadBalancer" {
 			// Check if any pod is linked to the service
-			endpoints, _ := clientset.CoreV1().Endpoints(svc.Namespace).Get(context.TODO(), svc.Name, metav1.GetOptions{})
+			endpoints, _ := clientset.CoreV1().Endpoints(namespace).Get(context.TODO(), svc.Name, metav1.GetOptions{})
 			if endpoints == nil || len(endpoints.Subsets) == 0 {
-				err := clientset.CoreV1().Services(svc.Namespace).Delete(context.TODO(), svc.Name, metav1.DeleteOptions{})
+				err := clientset.CoreV1().Services(namespace).Delete(context.TODO(), svc.Name, metav1.DeleteOptions{})
 				if err == nil {
-					log.Printf("Deleted unused LoadBalancer service: %s (namespace: %s)", svc.Name, svc.Namespace)
+					log.Printf("Deleted unused LoadBalancer service: %s (namespace: %s)", svc.Name, namespace)
 					deletedServices++
 				}
 			}
