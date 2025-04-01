@@ -8,6 +8,7 @@ import (
 
 var clusterName string
 var deleteBeforeHours int
+var namespace string
 
 // rootCmd represents the base command
 var rootCmd = &cobra.Command{
