@@ -10,7 +10,7 @@ import (
 
 var deleteCmd = &cobra.Command{
 	Use:   "delete",
-	Short: "delete a Kubernetes cluster for unused resources",
+	Short: "Delete unused resources from a Kubernetes cluster",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if clusterName == "" {
 			return fmt.Errorf("cluster name is required. Use --cluster or -c flag")
