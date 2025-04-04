@@ -28,7 +28,8 @@
           "--delete-before-hours",
           "48",
           "--namespace",
-          "default"
+          "default",
+          "--dry-run"
       ]
     }
   ]

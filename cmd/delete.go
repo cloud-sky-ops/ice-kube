@@ -17,16 +17,20 @@ var deleteCmd = &cobra.Command{
 		}
 
 		if namespace != "" {
-			fmt.Printf("Deleting cluster: %s in namespace %s\n", clusterName, namespace)
+			fmt.Printf("Scanning dangling resources in cluster: %s in namespace %s\n", clusterName, namespace)
 		} else {
-			fmt.Println("Deleting resources in cluster:", clusterName)
+			fmt.Println("Scanning dangling resources in cluster:\n", clusterName)
 		}
-		result, err := kubeclient.DeleteResources(clusterName, deleteBeforeHours, namespace)
+		result, err := kubeclient.DeleteResources(clusterName, deleteBeforeHours, namespace, dryRun)
 		if err != nil {
-			message := "Error deleting resources:"
+			message := "Error deleting resources:\n"
 			utils.PrintError(message, err)
 		}
-		fmt.Println("Delete Result:", result)
+		if dryRun{
+			fmt.Println("Dry Run Result:\n",result)
+		}else {
+			fmt.Println("Delete Result:\n",result)
+		}
 		return nil
 	},
 }
@@ -38,4 +42,5 @@ func init() {
 	deleteCmd.MarkFlagRequired("cluster")
 	deleteCmd.Flags().IntVarP(&deleteBeforeHours, "delete-before-hours", "t", 24, "Delete resources created before these number of hours.")
 	deleteCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Namespace to delete resources. Default is all namespaces")
+	deleteCmd.Flags().BoolVarP(&dryRun, "dry-run","d",false, "Dry run and print the resources eligible for deletion.")
 }
