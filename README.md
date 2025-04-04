@@ -3,7 +3,8 @@ Command-line tool for cost optimizations and metrics analysis on kubernetes clus
 
 ---
 ## Output for "ice-kube --help" 
-![image](https://github.com/user-attachments/assets/7d747697-32f2-417e-9906-41dbc5873c12)
+![image](https://github.com/user-attachments/assets/14ddc4ec-1b47-479c-af05-1d954b620065)
+
 
 ## Output for --dry-run flag
 
