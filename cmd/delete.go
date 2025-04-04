@@ -17,9 +17,9 @@ var deleteCmd = &cobra.Command{
 		}
 
 		if namespace != "" {
-			fmt.Printf("Deleting dangling resources in cluster: %s in namespace %s\n", clusterName, namespace)
+			fmt.Printf("Scanning dangling resources in cluster: %s in namespace %s\n", clusterName, namespace)
 		} else {
-			fmt.Println("Deleting dangling resources in cluster:\n", clusterName)
+			fmt.Println("Scanning dangling resources in cluster:\n", clusterName)
 		}
 		result, err := kubeclient.DeleteResources(clusterName, deleteBeforeHours, namespace, dryRun)
 		if err != nil {
