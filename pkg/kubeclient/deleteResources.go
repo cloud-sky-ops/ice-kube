@@ -8,20 +8,13 @@ import (
 
 	"golang.org/x/exp/slices"
 
-	utils "github.com/cloud-sky-ops/ice-kube/internal"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // DeleteResources connects to the Kubernetes API and cleans up completed pods, PVCs, and LoadBalancers
 func DeleteResources(clusterName string, deleteBeforeHours int, namespace string, dryRun bool) (string, error) {
 
-	clientset, err := utils.GetClientSet()
-
-	if err != nil {
-		return "", fmt.Errorf("failed to create Kubernetes client: %v", err)
-	}
-
-	pods, err := ScanResources(clusterName, namespace)
+	pods, clientset, err := ScanResources(clusterName, namespace)
 
 	if err != nil {
 		return "", fmt.Errorf("failed to list pods: %v", err)
@@ -139,7 +132,7 @@ func DeleteResources(clusterName string, deleteBeforeHours int, namespace string
 					}
 				}
 			} else {
-				if  len(endpoints.Subsets) == 0 {
+				if len(endpoints.Subsets) == 0 {
 					if dryRun {
 						servicesToDelete = append(servicesToDelete, svc.Name)
 						deletedServices++
@@ -154,7 +147,7 @@ func DeleteResources(clusterName string, deleteBeforeHours int, namespace string
 				} else {
 					for _, subset := range endpoints.Subsets {
 						for _, NotReadyAddress := range subset.NotReadyAddresses {
-							fmt.Printf("%s\n",NotReadyAddress.TargetRef.Name)
+							fmt.Printf("%s\n", NotReadyAddress.TargetRef.Name)
 							if slices.Contains(podsToDelete, NotReadyAddress.TargetRef.Name) {
 								if dryRun {
 									servicesToDelete = append(servicesToDelete, svc.Name)
@@ -171,10 +164,10 @@ func DeleteResources(clusterName string, deleteBeforeHours int, namespace string
 						}
 					}
 				}
-			}	
+			}
 		}
 	}
-	
+
 	if dryRun {
 		return fmt.Sprintf("%d Pods to delete: %s\n %d PVCs to delete: %s\n %d LoadBalancer services to delete: %s\n", deletedPods, podsToDelete, deletedPVCs, PVCstoDelete, deletedServices, servicesToDelete), nil
 	} else {

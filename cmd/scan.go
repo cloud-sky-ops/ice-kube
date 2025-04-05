@@ -20,7 +20,7 @@ var scanCmd = &cobra.Command{
 		} else {
 			fmt.Println("Scanning resources in cluster:", clusterName)
 		}
-		pods, err := kubeclient.ScanResources(clusterName, namespace)
+		pods, _,  err := kubeclient.ScanResources(clusterName, namespace)
 		if err != nil {
 			fmt.Println("Error in scanning resources in cluster:", clusterName)
 			return err
